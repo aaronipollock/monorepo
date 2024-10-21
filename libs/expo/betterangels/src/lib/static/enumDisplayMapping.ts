@@ -11,6 +11,7 @@ import {
   PronounEnum,
   RaceEnum,
   RelationshipTypeEnum,
+  SelahTeamEnum,
   ServiceEnum,
   SocialMediaEnum,
   YesNoPreferNotToSayEnum,
@@ -228,4 +229,24 @@ export const enumDisplayPreferredCommunication: {
   [PreferredCommunicationEnum.Linkedin]: 'Linkedin',
   [PreferredCommunicationEnum.Text]: 'Text',
   [PreferredCommunicationEnum.Whatsapp]: 'Whatsapp',
+};
+
+export const enumDisplaySelahTeam: {
+  [key in SelahTeamEnum]: string;
+} = {
+  [SelahTeamEnum.BowtieRiversideOutreach]: 'Bowtie & Riverside Outreach',
+  [SelahTeamEnum.EchoParkOnSite]: 'Echo Park On-site',
+  [SelahTeamEnum.EchoParkOutreach]: 'Echo Park Outreach',
+  [SelahTeamEnum.HollywoodOnSite]: 'Hollywood On-site',
+  [SelahTeamEnum.HollywoodOutreach]: 'Hollywood Outreach',
+  [SelahTeamEnum.LaRiverOutreach]: 'LA River Outreach',
+  [SelahTeamEnum.LosFelizOutreach]: 'Los Feliz Outreach',
+  [SelahTeamEnum.NortheastHollywoodOutreach]: 'Northeast Hollywood Outreach',
+  [SelahTeamEnum.SilverLakeOutreach]: 'Silver Lake Outreach',
+  [SelahTeamEnum.SlccOnSite]: 'SLCC On-site',
+  [SelahTeamEnum.SundaySocialAtwaterOnSite]: 'Sunday Social / Atwater On-site',
+  [SelahTeamEnum.SundaySocialAtwaterOutreach]:
+    'Sunday Social / Atwater Outreach',
+  [SelahTeamEnum.WdiOnSite]: 'WDI On-site',
+  [SelahTeamEnum.WdiOutreach]: 'WDI Outreach',
 };
