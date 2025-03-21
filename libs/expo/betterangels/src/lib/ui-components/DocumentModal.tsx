@@ -3,11 +3,11 @@ import {
   DownloadIcon,
   ViewIcon,
 } from '@monorepo/expo/shared/icons';
-import { BasicModal, Button, TextBold, TextButton, TextRegular } from '@monorepo/expo/shared/ui-components';
+import { DeleteModal, TextButton } from '@monorepo/expo/shared/ui-components';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert } from 'react-native';
 import { ClientDocumentType } from '../apollo';
 import {
   ClientProfileDocument,
@@ -26,7 +26,7 @@ const MIME_TYPE = 'application/octet-stream';
 
 export default function DocumentModal(props: IDocumentModalProps) {
   const { isModalVisible, closeModal, document, clientId } = props;
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  // const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteDocument] = useDeleteClientDocumentMutation({
     refetchQueries: [
       {
@@ -95,6 +95,29 @@ export default function DocumentModal(props: IDocumentModalProps) {
 
   const fileTypeText = getFileFileTypeText(document?.mimeType);
 
+  // Create a custom renderer for the delete action
+  const renderDeleteAction = () => {
+    return (
+      <DeleteModal
+        title={`Delete ${fileTypeText}?`}
+        body={`All data associated with this ${fileTypeText} will be deleted.`}
+        onDelete={() => {
+          handleDelete();
+          closeModal(); // Close parent modal when delete is confirmed
+        }}
+        button={
+          <TextButton
+            title={`Delete this ${fileTypeText}`}
+            fontSize="sm"
+            // leftElement={<DeleteIcon />}
+            onPress={() => {}} // DeleteModal will override this
+            accessibilityHint={`delete ${fileTypeText}`}
+          />
+        }
+      />
+    );
+  };
+
   const ACTIONS = [
     {
       title: `View this ${fileTypeText}`,
@@ -107,67 +130,23 @@ export default function DocumentModal(props: IDocumentModalProps) {
       onPress: downloadFile,
     },
     {
+      // This property would need to be supported by the MainModal component
+      customRender: renderDeleteAction,
+      // These would be used as fallbacks if customRender isn't supported
       title: `Delete this ${fileTypeText}`,
       Icon: DeleteIcon,
-      onPress: () => setDeleteModalVisible(true),
     },
   ];
 
   return (
-    <>
-      <MainModal
-        closeButton
-        vertical
-        actions={ACTIONS}
-        isModalVisible={isModalVisible}
-        closeModal={closeModal}
-        opacity={0.5}
-      />
-
-      <BasicModal
-        visible={deleteModalVisible}
-        onClose={() => setDeleteModalVisible(false)}
-      >
-        <TextBold size="lg">{`Delete ${fileTypeText}?`}</TextBold>
-        <TextRegular size="sm" mt="sm">
-          {`All data associated with this ${fileTypeText} will be deleted.`}
-        </TextRegular>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 16,
-          }}
-        >
-          <View
-            style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-          >
-            <TextButton
-              fontSize="sm"
-              onPress={() => setDeleteModalVisible(false)}
-              color="#007AFF"
-              accessibilityHint="cancel deletion"
-              title="Cancel"
-            />
-          </View>
-          <View style={{ flex: 1, marginLeft: 8 }}>
-            <Button
-              fontSize="sm"
-              size="full"
-              accessibilityHint={`deletes the ${fileTypeText}`}
-              onPress={() => {
-                handleDelete();
-                setDeleteModalVisible(false);
-                closeModal()
-              }}
-              variant="primary"
-              title="Delete"
-            />
-          </View>
-        </View>
-      </BasicModal>
-    </>
+    <MainModal
+      closeButton
+      vertical
+      actions={ACTIONS}
+      isModalVisible={isModalVisible}
+      closeModal={closeModal}
+      opacity={0.5}
+    />
   );
 }
 
