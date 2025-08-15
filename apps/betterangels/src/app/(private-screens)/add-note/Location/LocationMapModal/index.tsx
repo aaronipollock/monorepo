@@ -20,7 +20,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DEFAULT_LOCATION, INITIAL_LOCATION } from '../constants';
+import { DEFAULT_LOCATION, getInitialLocation } from '../constants';
 import Directions from './Directions';
 import Header from './Header';
 import Map from './Map';
@@ -56,7 +56,7 @@ export default function LocationMapModal(props: ILocationMapModalProps) {
   const [minizeModal, setMinimizeModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearch, setIsSearch] = useState(false);
-  const [initialLocation, setInitialLocation] = useState(INITIAL_LOCATION);
+  const [initialLocation, setInitialLocation] = useState(getInitialLocation());
   const [suggestions, setSuggestions] = useState<TPlacesPrediction[]>([]);
   const [chooseDirections, setChooseDirections] = useState(false);
   const [selected, setSelected] = useState<boolean>(false);
@@ -74,14 +74,24 @@ export default function LocationMapModal(props: ILocationMapModalProps) {
   >(undefined);
   const [updateNoteLocation, { error: updateError }] =
     useUpdateNoteLocationMutation();
-  const [hasUserCleared, setHasUserCleared] = useState(false);
 
   const insets = useSafeAreaInsets();
   const bottomOffset = insets.bottom;
   const router = useRouter();
 
+  const getInputValue = () => {
+    if (isSearch && searchQuery) {
+      return searchQuery;
+    }
+
+    if (address?.short) {
+      return address.short;
+    }
+
+    return DEFAULT_LOCATION.name;
+  };
+
   const closeModal = (hasLocation: boolean) => {
-    setHasUserCleared(false);
     if (!location?.address && !hasLocation) {
       setError(true);
     } else {
@@ -90,12 +100,6 @@ export default function LocationMapModal(props: ILocationMapModalProps) {
     router.back();
     setExpanded(undefined);
   };
-
-  useEffect(() => {
-    return () => {
-      setHasUserCleared(false);
-    };
-  }, []);
 
   const searchPlacesInCalifornia = useCallback(
     async (query: string) => {
@@ -165,14 +169,12 @@ export default function LocationMapModal(props: ILocationMapModalProps) {
       });
       setMinimizeModal(false);
       setSelected(true);
-      setHasUserCleared(false);
     } catch (err) {
       console.error(err);
     }
   };
 
   const onSearchChange = (query: string) => {
-    setHasUserCleared(false);
     setAddress({
       full: query,
       short: query,
@@ -196,7 +198,6 @@ export default function LocationMapModal(props: ILocationMapModalProps) {
   };
 
   const onSearchDelete = () => {
-    setHasUserCleared(true);
     setAddress(undefined);
     setCurrentLocation(undefined);
     setLocation(undefined);
@@ -262,7 +263,6 @@ export default function LocationMapModal(props: ILocationMapModalProps) {
       });
       setMinimizeModal(false);
       setSelected(true);
-      setHasUserCleared(false);
 
       const { data: locationData } = await updateNoteLocation({
         variables: {
@@ -315,7 +315,6 @@ export default function LocationMapModal(props: ILocationMapModalProps) {
         name: location.name ?? DEFAULT_LOCATION.name,
       });
       setSelected(true);
-      setHasUserCleared(false);
     } else {
       setAddress({
         short: DEFAULT_LOCATION.name,
@@ -328,7 +327,6 @@ export default function LocationMapModal(props: ILocationMapModalProps) {
         name: DEFAULT_LOCATION.name,
       });
       setSelected(true);
-      setHasUserCleared(false);
     }
 
     setSearchQuery('');
@@ -337,7 +335,6 @@ export default function LocationMapModal(props: ILocationMapModalProps) {
   }, [location]);
 
   const onDelete = () => {
-    setHasUserCleared(true);
     if (!selected) return;
     setAddress(undefined);
     setCurrentLocation(undefined);
@@ -401,7 +398,7 @@ export default function LocationMapModal(props: ILocationMapModalProps) {
             mt="sm"
             placeholder="Type location"
             icon={<SearchIcon ml="sm" color={Colors.NEUTRAL_LIGHT} />}
-            value={hasUserCleared ? '' : (address?.short || DEFAULT_LOCATION.name)}
+            value={getInputValue()}
             onChangeText={onSearchChange}
           />
           <FlatList
