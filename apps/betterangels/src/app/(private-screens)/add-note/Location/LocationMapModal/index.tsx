@@ -25,15 +25,11 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getInitialLocation } from '../constants';
 import Directions from './Directions';
 import Header from './Header';
 import Map from './Map';
 import Selected from './Selected';
-
-const INITIAL_LOCATION = {
-  longitude: -118.258815,
-  latitude: 34.048655,
-};
 
 type locationLongLat = {
   longitude: number;
@@ -75,7 +71,7 @@ export default function LocationMapModal(props: ILocationMapModalProps) {
   const [minizeModal, setMinimizeModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearch, setIsSearch] = useState(false);
-  const [initialLocation, setInitialLocation] = useState(INITIAL_LOCATION);
+  const [initialLocation, setInitialLocation] = useState(getInitialLocation());
   const [suggestions, setSuggestions] = useState<TPlacesPrediction[]>([]);
   const [chooseDirections, setChooseDirections] = useState(false);
   const [selected, setSelected] = useState<boolean>(false);
